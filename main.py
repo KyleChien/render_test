@@ -4,10 +4,14 @@ import time
 import random
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
-from _graph import Node, Link, Graph
+from utils import Node, Link, Graph
 from fastapi import FastAPI
 
 app = FastAPI()
+# model = 'sentence-transformers/all-mpnet-base-v2'				# 420MB
+# model = 'sentence-transformers/all-MiniLM-L6-v2'				# 80MB
+# model = 'sentence-transformers/paraphrase-albert-small-v2'	# 43MB
+model = 'sentence-transformers/multi-qa-distilbert-cos-v1'
 
 def print_cpu_info():
 	# Get CPU count and usage percentage
@@ -100,25 +104,7 @@ def compute_samll():
 	]
 	graph_small = Graph(nodes, links)
 	graph_small.to_json('./dummy_data_small.json')
-
-
-	# # >----------------------------------------------------------------------------------------------------
-	# # > all-mpnet-base-v2: 420MB
-	# # >----------------------------------------------------------------------------------------------------
-	# cpu_cost = test_computation_time_with_graph(graph_small, 'sentence-transformers/all-mpnet-base-v2', src, tgt, 'cpu')
-	# cpu_cost = test_computation_time_with_graph(graph_large, 'sentence-transformers/all-mpnet-base-v2', src, tgt, 'cpu')
-
-	# # >----------------------------------------------------------------------------------------------------
-	# # > all-MiniLM-L6-v2: 80 MB
-	# # >----------------------------------------------------------------------------------------------------
-	# cpu_cost = test_computation_time_with_graph(graph_small, 'sentence-transformers/all-MiniLM-L6-v2', src, tgt, 'cpu')
-	# cpu_cost = test_computation_time_with_graph(graph_large, 'sentence-transformers/all-MiniLM-L6-v2', src, tgt, 'cpu')
-
-	# >----------------------------------------------------------------------------------------------------
-	# > paraphrase-albert-small-v2: 43 MB
-	# >----------------------------------------------------------------------------------------------------
-	cpu_cost_small = test_computation_time_with_graph(graph_small, 'sentence-transformers/paraphrase-albert-small-v2', 'cpu')
-	
+	cpu_cost_small = test_computation_time_with_graph(graph_small, model, 'cpu')
 	return {"cpu_cost_small": cpu_cost_small}
 
 @app.get("/compute_large")
@@ -146,5 +132,5 @@ def compute_large():
 	graph_large = Graph(nodes, links)
 	graph_large.to_json('./dummy_data_large.json')
 
-	cpu_cost_large = test_computation_time_with_graph(graph_large, 'sentence-transformers/paraphrase-albert-small-v2', 'cpu')
+	cpu_cost_large = test_computation_time_with_graph(graph_large, model, 'cpu')
 	return {"cpu_cost_large": cpu_cost_large}
