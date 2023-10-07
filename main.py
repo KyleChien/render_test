@@ -51,7 +51,7 @@ def print_gpu_info():
 		print(f"GPU information not available: {e}")
 
 
-def test_computation_time_with_graph(graph, model_name, src, tgt, device):
+def test_computation_time_with_graph(graph, model_name, device):
 	print('#'*50)
 	print(f'Testing graph of with {len(graph)} nodes...')
 	print(f'Testing model: {model_name}...')
@@ -74,6 +74,16 @@ def test_computation_time_with_graph(graph, model_name, src, tgt, device):
 
 @app.get("/")
 def root():
+	return {"message": "Hello !"}
+
+@app.get("/compute_small")
+def compute_samll():
+	# >----------------------------------------------------------------------------------------------------
+	# > device information
+	# >----------------------------------------------------------------------------------------------------
+	print_cpu_info()
+	print_gpu_info()
+
 	# >----------------------------------------------------------------------------------------------------
 	# > generate dummy graph
 	# >----------------------------------------------------------------------------------------------------
@@ -91,29 +101,6 @@ def root():
 	graph_small = Graph(nodes, links)
 	graph_small.to_json('./dummy_data_small.json')
 
-	# large graph
-	num_proj = 1000
-	nodes = [
-		Node(idx=i, title=f'project {i}', tag='test1, test2, test3', 
-	   		abstract='abstract '*random.randint(10, 100), 
-			source='testing', owner='sudo', status='testing') for i in range(num_proj)
-	]
-	links = [
-		Link(source=random.randint(1, num_proj), 
-	   		target=random.randint(1, num_proj)) for _ in range(num_proj)
-	]
-	graph_large = Graph(nodes, links)
-	graph_large.to_json('./dummy_data_large.json')
-
-	
-	src = ["This is an test."]
-	tgt = ["This is an example sentence", "Each sentence is converted"]
-
-	# >----------------------------------------------------------------------------------------------------
-	# > device information
-	# >----------------------------------------------------------------------------------------------------
-	print_cpu_info()
-	print_gpu_info()
 
 	# # >----------------------------------------------------------------------------------------------------
 	# # > all-mpnet-base-v2: 420MB
@@ -130,9 +117,34 @@ def root():
 	# >----------------------------------------------------------------------------------------------------
 	# > paraphrase-albert-small-v2: 43 MB
 	# >----------------------------------------------------------------------------------------------------
-	cpu_cost_small = test_computation_time_with_graph(graph_small, 'sentence-transformers/paraphrase-albert-small-v2', src, tgt, 'cpu')
-	cpu_cost_large = test_computation_time_with_graph(graph_large, 'sentence-transformers/paraphrase-albert-small-v2', src, tgt, 'cpu')
-	return {
-		'cpu_cost_small': cpu_cost_small, 
-		'cpu_cost_large': cpu_cost_large
-	}
+	cpu_cost_small = test_computation_time_with_graph(graph_small, 'sentence-transformers/paraphrase-albert-small-v2', 'cpu')
+	
+	return {"cpu_cost_small": cpu_cost_small}
+
+@app.get("/compute_large")
+def compute_large():
+	# >----------------------------------------------------------------------------------------------------
+	# > device information
+	# >----------------------------------------------------------------------------------------------------
+	print_cpu_info()
+	print_gpu_info()
+
+	# >----------------------------------------------------------------------------------------------------
+	# > generate dummy graph
+	# >----------------------------------------------------------------------------------------------------
+	# large graph
+	num_proj = 1000
+	nodes = [
+		Node(idx=i, title=f'project {i}', tag='test1, test2, test3', 
+	   		abstract='abstract '*random.randint(10, 100), 
+			source='testing', owner='sudo', status='testing') for i in range(num_proj)
+	]
+	links = [
+		Link(source=random.randint(1, num_proj), 
+	   		target=random.randint(1, num_proj)) for _ in range(num_proj)
+	]
+	graph_large = Graph(nodes, links)
+	graph_large.to_json('./dummy_data_large.json')
+
+	cpu_cost_large = test_computation_time_with_graph(graph_large, 'sentence-transformers/paraphrase-albert-small-v2', 'cpu')
+	return {"cpu_cost_large": cpu_cost_large}
