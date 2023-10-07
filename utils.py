@@ -1,7 +1,5 @@
-import torch
 import json
 from typing import List
-from bardapi import BardCookies
 
 class Node():
 	def __init__(self, idx, title, tag, abstract, source, owner, status):
@@ -92,16 +90,3 @@ class Graph():
 		with open(json_path, 'w') as f:
 			json.dump(dct, f, indent=4)
 	
-
-def get_links_from_nodes(nodes:List[Node]) -> List[Link]:
-	"""
-	Build a list of link from tags of a list of node.
-	"""
-
-	return 
-
-def autotag_with_Bloom(prompt, model, tokenizer, max_new_tokens=100, device='cpu'):
-	inputs = tokenizer.encode(prompt, return_tensors='pt').to(device)
-	with torch.cuda.amp.autocast():
-		outputs = model.generate(inputs, max_new_tokens=max_new_tokens)
-	return tokenizer.decode(outputs[0], skip_special_tokens=True)
